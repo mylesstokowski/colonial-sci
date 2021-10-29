@@ -1,7 +1,11 @@
 # fig1c.R
+# Generate a histogram of the number of digitized specimens from Trinidad and 
+# Tobago published by the University of the West Indies per decade, grouped by
+# taxonomy.
 
 library(tidyverse)
 library(rgbif)
+library(ggimage)
 
 uwiQuery <- occ_data(institutionCode = 'uwizm', 
                      country = 'TT',
@@ -39,7 +43,7 @@ sum(is.na(uwiData$taxSimple))
 uwiData %>% filter(taxSimple == 'other') %>% pull(phylum) %>% table()
 
 # plot number of specimens of each taxonomic group published by decade
-uwiData %>% 
+fig1c <- uwiData %>% 
   filter(taxSimple != 'other') %>%
   ggplot(aes(x = decadeMiddle, fill = taxSimple)) + 
   geom_bar() + 
@@ -50,3 +54,12 @@ uwiData %>%
   guides(fill=guide_legend(title="Taxonomic group")) + 
   ylab('Number of specimens') + 
   xlab('Decade')
+
+ggsave(plot = fig1c,
+       file = 'fig1c.png',
+       device = 'png',
+       width = 30,
+       units = 'cm',
+       dpi = 300)
+
+

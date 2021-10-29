@@ -1,7 +1,10 @@
 # fig2.R
+# Generate a histogram of the number of digitzed specimens from the Bahamas 
+# published by the University of Florida per decade, grouped by taxonomy.
 
 library(tidyverse)
 library(rgbif)
+library(ggimage)
 
 # get data from GBIF
 bahamasQuery <- occ_data(institutionCode = 'UF;FLAS', 
@@ -63,9 +66,16 @@ groupLabels <-
   mutate(label = str_c(taxSimple, ' N=', n)) %>%
   pull(label)
 
+# renaming for nicer facet_wrap labels
+bahamasData$basisOfRecord = ifelse(
+  bahamasData$basisOfRecord == "PRESERVED_SPECIMEN",
+  "Preserved specimen",
+  "Fossil specimen")
+
+
 # plot the number of fossil and preserved specimens published per decade,
 # colored by taxonomic group
-bahamasData %>% 
+fig2 <- bahamasData %>% 
   ggplot(aes(x = decadeMiddle, fill = taxSimple)) + 
   geom_bar(width = 9) + 
   scale_fill_viridis_d(labels = groupLabels,
@@ -76,4 +86,15 @@ bahamasData %>%
   ylab('Number of specimens') + 
   xlab('Decade') + 
   facet_wrap(vars(basisOfRecord), 
-             ncol = 2)
+             ncol = 2,
+             strip.position = "bottom") + 
+  theme(strip.background = element_blank())
+
+ggsave(plot = fig2,
+       file = 'fig2.png',
+       device = 'png',
+       width = 30,
+       units = 'cm',
+       dpi = 300)
+
+

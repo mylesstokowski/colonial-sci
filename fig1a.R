@@ -1,7 +1,10 @@
 # fig1a.R
+# Generate a map of the number of preserved and fossil specimens collected in 
+# Trinidad and Tobago per natural history institution worldwide. 
 
 library(tidyverse)
 library(rgbif)
+library(ggimage)
 library(sf)
 library(rnaturalearth)
 
@@ -64,11 +67,21 @@ orgTibbleSf <- orgTibbleEdited %>%
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
 # map number of specimens published per institution
-ggplot(data = world) +
+fig1a <- ggplot(data = world) +
   geom_sf(lwd = 0) + 
   geom_sf(data = orgTibbleSf, aes(size = nSpecimens), shape = 21, 
           color = 'black', fill = 'black', alpha = 0.3) +
   coord_sf(ylim = c(-59, 70)) +
   theme_void() + 
-  scale_size_continuous(name = 'Specimens per \ninstitution',
-                        range = c(1, 14))
+  scale_size_binned(name = 'Specimens per \ninstitution',
+                        range = c(1, 10),
+                        breaks = c(0, 100, 1000, 10000, 
+                                   max(orgTibbleSf$nSpecimens)))
+
+ggsave(plot = fig1a,
+       file = 'fig1a.png',
+       device = png,
+       width = 30,
+       units = 'cm',
+       dpi = 300)
+
